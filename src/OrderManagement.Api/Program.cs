@@ -1,9 +1,24 @@
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+var postgresConn = builder.Configuration.GetConnectionString("Postgres");
+
+// Liveness: indicates whether the application process is running
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
+
+// Readiness: verifies external dependencies (PostgreSQL) before accepting traffic
+if (!string.IsNullOrWhiteSpace(postgresConn))
+{
+    builder.Services.AddHealthChecks()
+        .AddNpgSql(postgresConn, name: "postgres");
+}
 
 var app = builder.Build();
 
@@ -35,6 +50,19 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast")
 .WithOpenApi();
+
+// HealthChecks
+app.MapHealthChecks("/health/live", new HealthCheckOptions
+{
+    Predicate = r => r.Name == "self"
+});
+
+app.MapHealthChecks("/health/ready", new HealthCheckOptions
+{
+    Predicate = r => r.Name != "self"
+});
+
+app.MapHealthChecks("/health");
 
 app.Run();
 

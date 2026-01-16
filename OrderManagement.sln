@@ -19,13 +19,15 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderManagement.UnitTests",
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OrderManagement.IntegrationTests", "tests\OrderManagement.IntegrationTests\OrderManagement.IntegrationTests.csproj", "{6F9B0FF1-473C-4783-815D-488ED9E5B137}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docker", "docker", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+	ProjectSection(SolutionItems) = preProject
+		docker\docker-compose.yml = docker\docker-compose.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
-	EndGlobalSection
-	GlobalSection(SolutionProperties) = preSolution
-		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{A85C3376-D942-46EE-9B75-C865D266AAB4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -53,6 +55,9 @@ Global
 		{6F9B0FF1-473C-4783-815D-488ED9E5B137}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6F9B0FF1-473C-4783-815D-488ED9E5B137}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{A85C3376-D942-46EE-9B75-C865D266AAB4} = {9336DF33-9AF0-4171-81CB-9DB35DD9394B}
 		{9510AD56-3607-43C7-A651-C64A93B30C9C} = {9336DF33-9AF0-4171-81CB-9DB35DD9394B}
@@ -60,5 +65,8 @@ Global
 		{C4C227B8-DB45-4797-919F-78011C2CE46D} = {9336DF33-9AF0-4171-81CB-9DB35DD9394B}
 		{95FA6481-4797-4CBC-B85E-6498F23B58F5} = {7E40DC99-4402-44A5-88CF-8C261352E275}
 		{6F9B0FF1-473C-4783-815D-488ED9E5B137} = {7E40DC99-4402-44A5-88CF-8C261352E275}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {284F4899-8AE3-45C3-9734-AC1FAC988A6E}
 	EndGlobalSection
 EndGlobal
