@@ -1,28 +1,34 @@
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using OrderManagement.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// MVC Controllers
+builder.Services.AddControllers();
+
+// Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Infra (DbContext, Repos, etc.)
+builder.Services.AddInfrastructure(builder.Configuration);
+
+// Health checks (single registration + chaining)
 var postgresConn = builder.Configuration.GetConnectionString("Postgres");
 
-// Liveness: indicates whether the application process is running
-builder.Services.AddHealthChecks()
-    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy());
+var healthChecks = builder.Services.AddHealthChecks()
+    // Liveness: indicates whether the application process is running
+    .AddCheck("self", () => HealthCheckResult.Healthy());
 
-// Readiness: verifies external dependencies (PostgreSQL) before accepting traffic
 if (!string.IsNullOrWhiteSpace(postgresConn))
 {
-    builder.Services.AddHealthChecks()
-        .AddNpgSql(postgresConn, name: "postgres");
+    // Readiness: verifies external dependencies (PostgreSQL) before accepting traffic
+    healthChecks.AddNpgSql(postgresConn, name: "postgres");
 }
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -31,27 +37,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+// Map controllers
+app.MapControllers();
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast =  Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
-
-// HealthChecks
+// Health endpoints
 app.MapHealthChecks("/health/live", new HealthCheckOptions
 {
     Predicate = r => r.Name == "self"
@@ -59,14 +48,9 @@ app.MapHealthChecks("/health/live", new HealthCheckOptions
 
 app.MapHealthChecks("/health/ready", new HealthCheckOptions
 {
-    Predicate = r => r.Name != "self"
+    Predicate = r => r.Name == "postgres"
 });
 
 app.MapHealthChecks("/health");
 
 app.Run();
-
-record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)
-{
-    public int TemperatureF => 32 + (int)(TemperatureC / 0.5556);
-}
